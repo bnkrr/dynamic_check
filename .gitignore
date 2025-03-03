@@ -1,0 +1,53 @@
+# Python开发环境
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+.python-version
+
+# 虚拟环境
+venv/
+env/
+.venv/
+ENV/
+
+# IDE配置
+.idea/
+.vscode/
+*.swp
+*.sublime-workspace
+
+# 构建产物
+build/
+dist/
+*.exe
+*.dll
+
+# 测试覆盖
+.coverage
+htmlcov/
+.coverage.*
+
+# 日志文件
+*.log
+*.tmp
+
+# 本地配置文件
+.env
+.env.local
+.env.*.local
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# 数据库文件
+*.sqlite3
+*.db
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 数据文件
+*.gz

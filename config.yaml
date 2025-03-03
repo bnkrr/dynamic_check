@@ -1,0 +1,19 @@
+targets:
+  - url: https://example.com
+    timeout: 30
+    checks:
+      - type: header
+        name: Server
+        value: Apache
+      - type: cookie
+        name: session_id
+      - type: element
+        selector: meta[name="generator"]
+        attribute: content
+        value: WordPress
+
+  - url: https://httpbin.org/headers
+    checks:
+      - type: js_variable
+        name: window.appConfig.version
+        value: 2.0
