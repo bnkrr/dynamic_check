@@ -1,6 +1,7 @@
 name: example
 description: example template
 timeout: 30
+path: /
 checks:
   - type: header
     name: Server

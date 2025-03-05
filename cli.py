@@ -23,6 +23,14 @@ def load_urls(url_path: str) -> list:
     except Exception as e:
         raise FingerprintDetectionError(f"URL list error: {str(e)}")
 
+def url_append_path(url, path):
+    if url.endswith("/") and path.startswith("/"):
+        return url + path[1:]
+    elif not url.endswith("/") and not path.startswith("/"):
+        return url + "/" + path
+    else:
+        return url + path
+
 def main():
     parser = argparse.ArgumentParser(description="Web Fingerprint Validation Tool")
     parser.add_argument("-t", "--template", required=True, help="Path to YAML template file")
@@ -43,7 +51,7 @@ def main():
         with FingerprintDetector(headless=not args.visible) as detector:
             for url in urls:
                 result = detector.check_target(
-                    url=url,
+                    url=url_append_path(url, template.get("path", "/")),
                     checks=template.get("checks", []),
                     timeout=template.get("timeout", 30)
                 )
