@@ -1,0 +1,7 @@
+name: example js
+description: example js template
+timeout: 30
+checks:
+  - type: js_variable
+    name: window.appConfig.version
+    value: 2.0

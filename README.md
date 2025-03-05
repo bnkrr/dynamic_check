@@ -15,5 +15,6 @@ playwright install              # 安装headless browser
 
 2. 运行检测
 ```bash
-python cli.py -c config.yaml
+python cli.py -t templates/example.yaml -u targets/urls.txt -o output.jsonl
+python cli.py -t templates/example.yaml -u https://example.com
 ```

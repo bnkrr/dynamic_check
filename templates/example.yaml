@@ -1,0 +1,15 @@
+name: example
+description: example template
+timeout: 30
+checks:
+  - type: header
+    name: Server
+    value: Apache
+  - type: cookie
+    name: session_id
+  - type: element
+    selector: meta[name="generator"]
+    attribute: content
+    value: WordPress
+  - type: title
+    value: "Example Domain"
