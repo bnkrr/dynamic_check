@@ -33,6 +33,8 @@ class FingerprintDetector:
         try:
             page.set_default_timeout(timeout * 1000)
             response = page.goto(url)
+            page.wait_for_load_state("networkidle", timeout=timeout * 1000)
+            
             if not response.ok:
                 raise FingerprintDetectionError(f"HTTP {response.status}")
 
