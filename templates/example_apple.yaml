@@ -1,0 +1,9 @@
+name: apple.com with redirect
+description: use http://apple.com to test
+timeout: 30
+path: /
+checks:
+  - type: url
+    value: https://www.apple.com/
+  - type: title
+    value: "Apple"

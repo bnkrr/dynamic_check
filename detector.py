@@ -43,7 +43,8 @@ class FingerprintDetector:
                 "title": page.title(),
                 "content": page.content(),
                 "headers": response.headers,
-                "cookies": self.context.cookies()
+                "cookies": self.context.cookies(),
+                "url": page.url,
             }
 
             # Execute all checks
@@ -66,6 +67,7 @@ class FingerprintDetector:
             "header": self._check_header,
             "cookie": self._check_cookie,
             "element": self._check_element,
+            "url": self._check_url,
             "js_variable": self._check_js_variable,
             "title": self._check_title,
             "content": self._check_content
@@ -101,6 +103,19 @@ class FingerprintDetector:
         
         return {
             "type": "header",
+            "success": success,
+            "expected": expected,
+            "found": found,
+            "error": None
+        }
+
+    def _check_url(self, check: Dict, page_info: Dict, _) -> Dict:
+        expected = check["value"]
+        found = page_info["url"]
+        success = (found == expected)
+        
+        return {
+            "type": "url",
             "success": success,
             "expected": expected,
             "found": found,
@@ -198,3 +213,11 @@ class FingerprintDetector:
             "found": found,
             "error": None
         }
+        
+class FingerprintDetectorWithTemplate(FingerprintDetector):
+    def __init__(self, headless: bool = True, template: Dict = None):
+        super().__init__(headless)
+        self.template = template
+
+    def check_target(self, url: str, timeout: int = 30) -> Dict:
+        return super().check_target(url, self.template["checks"], timeout)
