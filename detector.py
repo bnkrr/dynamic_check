@@ -18,6 +18,9 @@ class FingerprintDetector:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+
+    def stop(self):
         self.context.close()
         self.browser.close()
         self.playwright.stop()
