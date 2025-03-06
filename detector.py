@@ -1,8 +1,9 @@
 import re
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Iterable
 from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Page
 import json
+import yaml
 
 class FingerprintDetectionError(Exception):
     """Base exception for fingerprint detection errors"""
@@ -169,8 +170,7 @@ class FingerprintDetector:
             "error": None
         }
 
-    def _check_js_variable(self, check: Dict, page_info: Dict, page) -> Dict:
-        var_path = check["name"].split(".")
+    def _check_js_variable(self, check: Dict, _, page: Page) -> Dict:
         result = page.evaluate(f"JSON.stringify({check['name']})")
         
         try:
@@ -215,9 +215,47 @@ class FingerprintDetector:
         }
         
 class FingerprintDetectorWithTemplate(FingerprintDetector):
-    def __init__(self, headless: bool = True, template: Dict = None):
+    def __init__(self, template: Dict|str, headless: bool = True, timeout=None):
         super().__init__(headless)
-        self.template = template
+        
+        if isinstance(template, str):
+            self.template = self.load_template(template)
+        else:
+            self.template = template
 
-    def check_target(self, url: str, timeout: int = 30) -> Dict:
+        # P0: direct setting of timeout each check
+        # P1: direct setting of timeout
+        # P2: template setting of timeout
+        # P3: default timeout (30)
+        if timeout is not None:
+            self.timeout = timeout
+        else:
+            self.timeout = self.template.get("timeout", 30)
+
+    @staticmethod
+    def load_template(template_path: str) -> dict:
+        try:
+            with open(template_path) as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            raise FingerprintDetectionError(f"Config error: {str(e)}")
+
+    @staticmethod
+    def url_append_path(url, path):
+        if url.endswith("/") and path.startswith("/"):
+            return url + path[1:]
+        elif not url.endswith("/") and not path.startswith("/"):
+            return url + "/" + path
+        else:
+            return url + path
+
+    def check_target_with_template(self, base_url: str, timeout: int = None) -> Dict:
+        if timeout is None:
+            timeout = self.timeout
+        url = self.url_append_path(base_url, self.template.get("path", "/"))
         return super().check_target(url, self.template["checks"], timeout)
+    
+    def iter_check_targets(self, base_urls: Iterable[str], timeout: int = None):
+        for base_url in base_urls:
+            yield self.check_target_with_template(base_url, timeout)
+

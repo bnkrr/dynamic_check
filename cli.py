@@ -1,15 +1,8 @@
 import yaml
-from detector import FingerprintDetector, FingerprintDetectionError
+from detector import FingerprintDetectorWithTemplate, FingerprintDetectionError
 import argparse
 import json
 import sys
-
-def load_template(template_path: str) -> dict:
-    try:
-        with open(template_path) as f:
-            return yaml.safe_load(f)
-    except Exception as e:
-        raise FingerprintDetectionError(f"Config error: {str(e)}")
 
 def is_url(url: str) -> bool:
     return url.startswith("http://") or url.startswith("https://")
@@ -23,14 +16,6 @@ def load_urls(url_path: str) -> list:
     except Exception as e:
         raise FingerprintDetectionError(f"URL list error: {str(e)}")
 
-def url_append_path(url, path):
-    if url.endswith("/") and path.startswith("/"):
-        return url + path[1:]
-    elif not url.endswith("/") and not path.startswith("/"):
-        return url + "/" + path
-    else:
-        return url + path
-
 def main():
     parser = argparse.ArgumentParser(description="Web Fingerprint Validation Tool")
     parser.add_argument("-t", "--template", required=True, help="Path to YAML template file")
@@ -41,20 +26,14 @@ def main():
     args = parser.parse_args()
     
     try:
-        template = load_template(args.template)
         urls = load_urls(args.url)
         
         if args.output:
             fout = open(args.output, "w")
         results = []
         
-        with FingerprintDetector(headless=not args.visible) as detector:
-            for url in urls:
-                result = detector.check_target(
-                    url=url_append_path(url, template.get("path", "/")),
-                    checks=template.get("checks", []),
-                    timeout=template.get("timeout", 30)
-                )
+        with FingerprintDetectorWithTemplate(template=args.template, headless=not args.visible) as detector:
+            for result in detector.iter_check_targets(urls):
                 results.append(result)
                 if args.output:
                     fout.write(json.dumps(result)+'\n')
